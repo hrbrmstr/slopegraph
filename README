@@ -1,0 +1,18 @@
+I've been wanting to throw together some non-R code to make
+basic slopegraphs for quite some time. Python seems to be a bit
+more accessible to folks, so it seemed like the logical choice, 
+especially given how spiffy the Cairo framework is.
+
+This intial release needs work (as the comments show).
+
+While it does, indeed, make a pretty nice slopegraph (the demo
+one is similar to one found here:
+
+http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk
+
+Just scroll down a bit to find the graph that looks similar with the
+life expetancy data) it isn't very flexible and the numeric labels
+don't line up perfectly.
+
+Still, all you need is Cairo (http://cairographics.org/) and you should
+be able to make basic slopegraphs with just a few tweaks.
