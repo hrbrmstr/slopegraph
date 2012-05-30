@@ -225,11 +225,14 @@ for k in sorted(endKeys):
 
 	val = float(k)
 		
-	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
+	cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
 	cr.move_to(width - X_MARGIN - spaceWidth - eWidth - spaceWidth - endMaxLabelWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
 	cr.show_text(k)
+
+	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
 	cr.move_to(width - X_MARGIN - spaceWidth - eWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
 	cr.show_text(label)
+
 	cr.stroke()
 
 # do the actual plotting
@@ -237,8 +240,6 @@ for k in sorted(endKeys):
 LINE_R = (198.0/255.0)
 LINE_G = (182.0/255.0)
 LINE_B = (180.0/255.0)
-
-print LINE_R
 
 cr.set_line_width(PLOT_LINE_WIDTH)
 cr.set_source_rgb(LINE_R, LINE_G, LINE_B) # need to make this a constant
