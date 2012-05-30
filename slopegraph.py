@@ -9,6 +9,7 @@
 # http://cairographics.org/
 #
 # 2012-05-28 - 0.5 - Initial github release. Still needs some polish
+# 2012-05-20 - 0.6 - Value labels now align; Added object colors; Changed example to use serif
 #
 
 import csv
@@ -29,6 +30,10 @@ ends = {} # ending "points"
 
 startLabelMaxLen = 0
 endLabelMaxLen = 0
+begMax = 0
+endMax = 0
+longestBeg = ""
+longestEnd = ""
 
 # build a base pair array for the final plotting
 # wastes memory, but simplifies plotting
@@ -61,6 +66,8 @@ for row in slopeReader:
 		startLabelMaxLen = len(starts[beg]) + len(beg)
 		s1 = starts[beg]
 
+	if len(beg) > begMax : longestBeg = beg ;
+
 
 	if end in ends:
 		ends[end] = ends[end] + "; " + lab
@@ -70,6 +77,8 @@ for row in slopeReader:
 	if ((len(ends[end]) + len(end)) > endLabelMaxLen):
 		endLabelMaxLen = len(ends[end]) + len(end)
 		e1 = ends[end]
+		
+	if len(end) > endMax : longestEnd = end ;
 
 # sort all the values (in the event the CSV wasn't) so
 # we can determine the smallest increment we need to use
@@ -128,12 +137,14 @@ filename = 'slopegraph.pdf'
 surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
 cr = cairo.Context (surface)
 cr.save()
-cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+cr.select_font_face("Serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 cr.set_font_size(FONT_SIZE)
 cr.set_line_width(LINE_WIDTH)
 xbearing, ybearing, sWidth, sHeight, xadvance, yadvance = (cr.text_extents(s1))
 xbearing, ybearing, eWidth, eHeight, xadvance, yadvance = (cr.text_extents(e1))
 xbearing, ybearing, spaceWidth, spaceHeight, xadvance, yadvance = (cr.text_extents(" "))
+xbearing, ybearing, startMaxLabelWidth, startMaxLabelHeioght, xadvance, yadvance = (cr.text_extents(longestBeg))
+xbearing, ybearing, endMaxLabelWidth, endMaxLabelHeioght, xadvance, yadvance = (cr.text_extents(longestEnd))
 cr.restore()
 cr.show_page()
 surface.finish()
@@ -148,7 +159,7 @@ spaceWidth = 5
 LINE_HEIGHT = 15
 PLOT_LINE_WIDTH = 0.5
 
-width = (X_MARGIN * 2) + sWidth + spaceWidth + SLOPEGRAPH_CANVAS_SIZE + spaceWidth + eWidth
+width = X_MARGIN + sWidth + spaceWidth + startMaxLabelWidth + spaceWidth + SLOPEGRAPH_CANVAS_SIZE + spaceWidth + endMaxLabelWidth + spaceWidth + eWidth + X_MARGIN ;
 height = (Y_MARGIN * 2) + (((highest - lowest + 1) / delta) * LINE_HEIGHT)
 
 # create the real Cairo surface/canvas
@@ -159,30 +170,53 @@ cr = cairo.Context (surface)
 
 cr.save()
 
-cr.select_font_face("Sans", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+cr.select_font_face("Serif", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 cr.set_font_size(FONT_SIZE)
 
 cr.set_line_width(LINE_WIDTH)
-cr.set_source_rgba (0, 0, 0) # need to make this a constant
+
+BG_R = (254.0/255.0)
+BG_G = (249.0/255.0)
+BG_B = (229.0/255.0)
+
+cr.set_source_rgb(BG_R,BG_G,BG_B)
+cr.rectangle(0,0,width,height)
+cr.fill()
 
 # draw start labels at the correct positions
 # cheating a bit here as the code doesn't (yet) line up 
 # the actual data values
 
+LAB_R = (140.0/255.0)
+LAB_G = (31.0/255.0)
+LAB_B = (40.0/255.0)
+
+VAL_R = (198.0/255.0)
+VAL_G = (107.0/255.0)
+VAL_B = (26.0/255.0)
+
 for k in sorted(startKeys):
 
 	label = starts[k]
 	xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
+	xbearing, ybearing, kWidth, kHeight, xadvance, yadvance = (cr.text_extents(k))
 
 	val = float(k)
-		
+
+	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
 	cr.move_to(X_MARGIN + (sWidth - lWidth), Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
-	cr.show_text(label + " " + k)
+	cr.show_text(label)
+	
+	cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
+	cr.move_to(X_MARGIN + sWidth + spaceWidth + (startMaxLabelWidth - kWidth), Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
+	cr.show_text(k)
+	
 	cr.stroke()
 
 # draw end labels at the correct positions
 # cheating a bit here as the code doesn't (yet) line up 
 # the actual data values
+
 
 for k in sorted(endKeys):
 
@@ -191,14 +225,25 @@ for k in sorted(endKeys):
 
 	val = float(k)
 		
-	cr.move_to(width - X_MARGIN - eWidth - (4*spaceWidth), Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
-	cr.show_text(k + " " + label)
+	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
+	cr.move_to(width - X_MARGIN - spaceWidth - eWidth - spaceWidth - endMaxLabelWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
+	cr.show_text(k)
+	cr.move_to(width - X_MARGIN - spaceWidth - eWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
+	cr.show_text(label)
 	cr.stroke()
 
 # do the actual plotting
 
+LINE_R = (198.0/255.0)
+LINE_G = (182.0/255.0)
+LINE_B = (180.0/255.0)
+
+print LINE_R
+
 cr.set_line_width(PLOT_LINE_WIDTH)
-cr.set_source_rgba (0.75, 0.75, 0.75) # need to make this a constant
+cr.set_source_rgb(LINE_R, LINE_G, LINE_B) # need to make this a constant
+
+#width = X_MARGIN + sWidth + spaceWidth + startMaxLabelWidth + spaceWidth + SLOPEGRAPH_CANVAS_SIZE + spaceWidth + endMaxLabelWidth + spaceWidth + eWidth + X_MARGIN ;
 
 for s1,e1 in pairs:
 	cr.move_to(X_MARGIN + sWidth + spaceWidth + 20, Y_MARGIN + (highest - s1) * LINE_HEIGHT * (1/delta) + LINE_HEIGHT/2)
