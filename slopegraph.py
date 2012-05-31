@@ -163,6 +163,7 @@ for k in sorted(startKeys):
 	if (startMaxLabelWidth > maxNumWidth) : maxNumWidth = startMaxLabelWidth
 
 sWidth = maxLabelWidth
+startMaxLabelWidth = maxNumWidth
 
 maxWidth = 0
 maxNumWidth = 0
@@ -175,7 +176,7 @@ for k in sorted(endKeys):
 	if (endMaxLabelWidth > maxNumWidth) : maxNumWidth = endMaxLabelWidth
 
 eWidth = maxLabelWidth
-	
+endMaxLabelWidth = maxNumWidth	
 
 cr.restore()
 cr.show_page()
