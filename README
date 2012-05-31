@@ -16,3 +16,6 @@ don't line up perfectly.
 
 Still, all you need is Cairo (http://cairographics.org/) and you should
 be able to make basic slopegraphs with just a few tweaks.
+
+The code is nearly ready for final refactoring (i.e. moving elements to
+functions).
