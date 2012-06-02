@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python
 #
 # slopegraph.py
 #
@@ -14,253 +14,278 @@
 #                      Also tossed in some data set "anomalies" for testing purposes
 # 2012-05-31 - 0.7.1 - New sample data file to play with; new theme sample; formatting tweaks & fixes
 #                      Added hashbang; moved font family to variable in prep for refactor
+# 2012-06-02 - 0.8.0 - Refactored into a more pythonic format; it's now "config"-file based
+#                      (see the README for details) and part of that also allows for sprintf-like
+#                      formatting of the value part of the label as well as being able to specify
+#                      the theme colors in the standard RGB hex string format. The code now assumes
+#                      LABEL,COL1VAL,COL2VAL as the CSV input in preparation for an arbitrary # of
+#                      columns (though I suspect 4 might be the most useful max). Without hacking the
+#                      code directly, it still only supports PDF output and you'll have to remove the
+#                      background fill code if you want a transparent background. Those options are
+#                      coming.
 #
 
 import csv
 import cairo
-
-# original data source: http://www.calvin.edu/~stob/data/television.csv
-# (use fields 0, 5 & 4)
-
-# updated data source
-# Median Age of Women at First Marriage, by Age Group - Rankings
-# DataFinder by The Population Reference Bureau: http://bit.ly/KANOPK
-# (use fields 0, 1 & 2)
-
-# get a CSV file to work with 
-
-slopeReader = csv.reader(open('television.csv', 'rb'), delimiter=',', quotechar='"')
-#slopeReader = csv.reader(open('median-age.csv', 'rb'), delimiter=',', quotechar='"')
-
-starts = {} # starting "points"/
-ends = {} # ending "points"
-
-# setup line width and font-size for the Cairo you can change these and the constants should
-# scale the plots accordingly. You shld be able to use any system font with Cairo's toy
-# font engine.
-
-FONT_FAMILY = "Palatino"
-FONT_SIZE = 20
-LINE_WIDTH = 0.5
-
-# setup some more constants for plotting all of these are malleable and should cascade nicely
-
-X_MARGIN = 20
-Y_MARGIN = 30
-SLOPEGRAPH_CANVAS_SIZE = 300
-SPACE_WIDTH = FONT_SIZE / 4.0
-LINE_HEIGHT = FONT_SIZE + (FONT_SIZE / 2.0)
-PLOT_LINE_WIDTH = 0.5
-LINE_START_DELTA = 1.5*SPACE_WIDTH
-
-# colors
-
-LAB_R = (34.0/255.0)
-LAB_G = (17.0/255.0)
-LAB_B = (17.0/255.0)
-
-VAL_R = (119.0/255.0)
-VAL_G = (85.0/255.0)
-VAL_B = (85.0/255.0)
-
-LINE_R = (170.0/255.0)
-LINE_G = (119.0/255.0)
-LINE_B = (36.0/255.0)
-
-BG_R = (255.0/255.0)
-BG_G = (255.0/255.0)
-BG_B = (255.0/255.0)
-
-# build a base pair array for the final plotting
-
-pairs = []
-
-for row in slopeReader:
-
-	# add chosen values (need start/end for each CSV row) to the final plotting array.
+import argparse
+import json
 	
-	lab = row[0] # label
-	beg = float(row[5]) 
-	end = float(row[4]) 
+def split(input, size):
+	return [input[start:start+size] for start in range(0, len(input), size)]
+
+class Slopegraph:
+
+	SLOPEGRAPH_CANVAS_SIZE = 300
+
+	starts = {} # starting "points"
+	ends = {} # ending "points"
+	pairs = [] # base pair array for the final plotting
 	
-	pairs.append( (float(beg), float(end)) )
-
-	# combine labels of common values into one string
-
-	if beg in starts:
-		starts[beg] = starts[beg] + "; " + lab
-	else:
-		starts[beg] = lab
+	def readCSV(self, filename):
 	
-
-	if end in ends:
-		ends[end] = ends[end] + "; " + lab
-	else:
-		ends[end] = lab
-			
-
-# sort all the values (in the event the CSV wasn't) so
-# we can determine the smallest increment we need to use
-# when stacking the labels and plotting points
-
-startSorted = [(k, starts[k]) for k in sorted(starts)]
-endSorted = [(k, ends[k]) for k in sorted(ends)]
-
-startKeys = sorted(starts.keys())
-delta = max(startSorted)
-for i in range(len(startKeys)):
-	if (i+1 <= len(startKeys)-1):
-		currDelta = float(startKeys[i+1]) - float(startKeys[i])
-		if (currDelta < delta):
-			delta = currDelta
-			
-endKeys = sorted(ends.keys())
-for i in range(len(endKeys)):
-	if (i+1 <= len(endKeys)-1):
-		currDelta = float(endKeys[i+1]) - float(endKeys[i])
-		if (currDelta < delta):
-			delta = currDelta
-
-# we also need to find the absolute min & max values
-# so we know how to scale the plots
-
-lowest = min(startKeys)
-if (min(endKeys) < lowest) : lowest = min(endKeys)
-
-highest = max(startKeys)
-if (max(endKeys) > highest) : highest = max(endKeys)
-
-# just making sure everything's a number
-# probably should move some of this to the csv reader section
-
-delta = float(delta)
-lowest = float(lowest)
-highest = float(highest)
-
-sWidth = 0.0
-eWidth = 0.0
-
-# there has to be a better way to get a base "surface"
-# to do font calculations besides this. we're just making
-# this Cairo surface to we know the max pixel width 
-# (font extents) of the labels in order to scale the graph
-# accurately (since width/height are based, in part, on it)
-
-#filename = 'slopegraph.ps'
-filename = 'slopegraph.pdf'
-#surface = cairo.PSSurface (filename, 8.5*72, 11*72)
-#surface.set_eps(True)
-surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
-cr = cairo.Context (surface)
-cr.save()
-cr.select_font_face(FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-cr.set_font_size(FONT_SIZE)
-cr.set_line_width(LINE_WIDTH)
-
-# find the *real* maximum label width (not just based on number of chars)
-
-maxLabelWidth = 0
-maxNumWidth = 0
-
-for k in sorted(startKeys):
-	s1 = starts[k]
-	xbearing, ybearing, sWidth, sHeight, xadvance, yadvance = (cr.text_extents(s1))
-	if (sWidth > maxLabelWidth) : maxLabelWidth = sWidth
-	xbearing, ybearing, startMaxLabelWidth, startMaxLabelHeight, xadvance, yadvance = (cr.text_extents(str(k)))
-	if (startMaxLabelWidth > maxNumWidth) : maxNumWidth = startMaxLabelWidth
-
-sWidth = maxLabelWidth
-startMaxLabelWidth = maxNumWidth
-
-maxWidth = 0
-maxNumWidth = 0
-
-for k in sorted(endKeys):
-	e1 = ends[k]
-	xbearing, ybearing, eWidth, eHeight, xadvance, yadvance = (cr.text_extents(e1))
-	if (eWidth > maxLabelWidth) : maxLabelWidth = eWidth
-	xbearing, ybearing, endMaxLabelWidth, endMaxLabelHeight, xadvance, yadvance = (cr.text_extents(str(k)))
-	if (endMaxLabelWidth > maxNumWidth) : maxNumWidth = endMaxLabelWidth
-
-eWidth = maxLabelWidth
-endMaxLabelWidth = maxNumWidth	
-
-cr.restore()
-cr.show_page()
-surface.finish()
-
-width = X_MARGIN + sWidth + SPACE_WIDTH + startMaxLabelWidth + SPACE_WIDTH + SLOPEGRAPH_CANVAS_SIZE + SPACE_WIDTH + endMaxLabelWidth + SPACE_WIDTH + eWidth + X_MARGIN ;
-height = (Y_MARGIN * 2) + (((highest - lowest) / delta) * LINE_HEIGHT)
-
-# create the real Cairo surface/canvas
-
-filename = 'slopegraph.pdf'
-#filename = 'slopegraph.ps'
-surface = cairo.PDFSurface (filename, width, height)
-#surface = cairo.PSSurface (filename, width, height)
-#surface.set_eps(True)
-cr = cairo.Context (surface)
-
-cr.save()
-
-cr.select_font_face(FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-cr.set_font_size(FONT_SIZE)
-
-cr.set_line_width(LINE_WIDTH)
-
-cr.set_source_rgb(BG_R,BG_G,BG_B)
-cr.rectangle(0,0,width,height)
-cr.fill()
-
-# draw start labels at the correct positions
-
-for k in sorted(startKeys):
-
-	label = starts[k]
-	xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
-	xbearing, ybearing, kWidth, kHeight, xadvance, yadvance = (cr.text_extents(str(k)))
-
-	val = float(k)
-
-	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-	cr.move_to(X_MARGIN + (sWidth - lWidth), Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta))
-	cr.show_text(label)
+		slopeReader = csv.reader(open(filename, 'rb'), delimiter=',', quotechar='"')
 	
-	cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-	cr.move_to(X_MARGIN + sWidth + SPACE_WIDTH + (startMaxLabelWidth - kWidth), Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta))
-	cr.show_text(str(k))
-	
-	cr.stroke()
-
-# draw end labels at the correct positions
-
-for k in sorted(endKeys):
-
-	label = ends[k]
-	xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
-
-	val = float(k)
+		for row in slopeReader:
 		
-	cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-	cr.move_to(width - X_MARGIN - SPACE_WIDTH - eWidth - SPACE_WIDTH - endMaxLabelWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta))
-	cr.show_text(str(k))
+			# add chosen values (need start/end for each CSV row) to the final plotting array.
+			
+			lab = row[0] # label
+			beg = float(row[1]) # left vals
+			end = float(row[2]) # right vals
+			
+			self.pairs.append( (float(beg), float(end)) )
+		
+			# combine labels of common values into one string
+		
+			if beg in self.starts:
+				self.starts[beg] = self.starts[beg] + "; " + lab
+			else:
+				self.starts[beg] = lab
+			
+		
+			if end in self.ends:
+				self.ends[end] = self.ends[end] + "; " + lab
+			else:
+				self.ends[end] = lab
 
-	cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-	cr.move_to(width - X_MARGIN - SPACE_WIDTH - eWidth, Y_MARGIN + (highest - val) * LINE_HEIGHT * (1/delta))
-	cr.show_text(label)
 
-	cr.stroke()
+	def sortKeys(self):
+	
+		# sort all the values (in the event the CSV wasn't) so
+		# we can determine the smallest increment we need to use
+		# when stacking the labels and plotting points
+		
+		self.startSorted = [(k, self.starts[k]) for k in sorted(self.starts)]
+		self.endSorted = [(k, self.ends[k]) for k in sorted(self.ends)]
+		
+		self.startKeys = sorted(self.starts.keys())
+		self.delta = max(self.startSorted)
+		for i in range(len(self.startKeys)):
+			if (i+1 <= len(self.startKeys)-1):
+				currDelta = float(self.startKeys[i+1]) - float(self.startKeys[i])
+				if (currDelta < self.delta):
+					self.delta = currDelta
+					
+		self.endKeys = sorted(self.ends.keys())
+		for i in range(len(self.endKeys)):
+			if (i+1 <= len(self.endKeys)-1):
+				currDelta = float(self.endKeys[i+1]) - float(self.endKeys[i])
+				if (currDelta < self.delta):
+					self.delta = currDelta
 
-# do the actual plotting
 
-cr.set_line_width(PLOT_LINE_WIDTH)
-cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
+	def findExtremes(self):
+	
+		# we also need to find the absolute min & max values
+		# so we know how to scale the plots
+		
+		self.lowest = min(self.startKeys)
+		if (min(self.endKeys) < self.lowest) : self.lowest = min(self.endKeys)
+		
+		self.highest = max(self.startKeys)
+		if (max(self.endKeys) > self.highest) : self.highest = max(self.endKeys)
+		
+		self.delta = float(self.delta)
+		self.lowest = float(self.lowest)
+		self.highest = float(self.highest)
 
-for s1,e1 in pairs:
-	cr.move_to(X_MARGIN + sWidth + SPACE_WIDTH + startMaxLabelWidth + LINE_START_DELTA, Y_MARGIN + (highest - s1) * LINE_HEIGHT * (1/delta) - LINE_HEIGHT/4)
-	cr.line_to(width - X_MARGIN - eWidth - SPACE_WIDTH - endMaxLabelWidth - LINE_START_DELTA, Y_MARGIN + (highest - e1) * LINE_HEIGHT * (1/delta) - LINE_HEIGHT/4)
-	cr.stroke()
+	
+	def calculateExtents(self, filename, format, valueFormatString):
+	
+		surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
+		cr = cairo.Context (surface)
+		cr.save()
+		cr.select_font_face(self.FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+		cr.set_font_size(self.FONT_SIZE)
+		cr.set_line_width(self.LINE_WIDTH)
+		
+		# find the *real* maximum label width (not just based on number of chars)
+		
+		maxLabelWidth = 0
+		maxNumWidth = 0
+		
+		for k in sorted(self.startKeys):
+			s1 = self.starts[k]
+			xbearing, ybearing, self.sWidth, self.sHeight, xadvance, yadvance = (cr.text_extents(s1))
+			if (self.sWidth > maxLabelWidth) : maxLabelWidth = self.sWidth
+			xbearing, ybearing, self.startMaxLabelWidth, startMaxLabelHeight, xadvance, yadvance = (cr.text_extents(valueFormatString % (k)))
+			if (self.startMaxLabelWidth > maxNumWidth) : maxNumWidth = self.startMaxLabelWidth
+		
+		self.sWidth = maxLabelWidth
+		self.startMaxLabelWidth = maxNumWidth
+		
+		maxLabelWidth = 0
+		maxNumWidth = 0
+		
+		for k in sorted(self.endKeys):
+			e1 = self.ends[k]
+			xbearing, ybearing, self.eWidth, eHeight, xadvance, yadvance = (cr.text_extents(e1))
+			if (self.eWidth > maxLabelWidth) : maxLabelWidth = self.eWidth
+			xbearing, ybearing, self.endMaxLabelWidth, endMaxLabelHeight, xadvance, yadvance = (cr.text_extents(valueFormatString % (k)))
+			if (self.endMaxLabelWidth > maxNumWidth) : maxNumWidth = self.endMaxLabelWidth
+		
+		self.eWidth = maxLabelWidth
+		self.endMaxLabelWidth = maxNumWidth	
+		
+		cr.restore()
+		cr.show_page()
+		surface.finish()
+		
+		self.width = self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.SPACE_WIDTH + self.SLOPEGRAPH_CANVAS_SIZE + self.SPACE_WIDTH + self.endMaxLabelWidth + self.SPACE_WIDTH + self.eWidth + self.X_MARGIN ;
+		self.height = (self.Y_MARGIN * 2) + (((self.highest - self.lowest) / self.delta) * self.LINE_HEIGHT)
+		
+		
+	def makeSlopegraph(self, filename, config):
+	
+		(lab_r,lab_g,lab_b) = split(config["label_color"],2)
+		(val_r,val_g,val_b) = split(config["value_color"],2)
+		(line_r,line_g,line_b) = split(config["slope_color"],2)
+		(bg_r,bg_g,bg_b) = split(config["background_color"],2)
+		
+		LAB_R = (int(lab_r, 16)/255.0)
+		LAB_G = (int(lab_g, 16)/255.0)
+		LAB_B = (int(lab_b, 16)/255.0)
+		
+		VAL_R = (int(val_r, 16)/255.0)
+		VAL_G = (int(val_g, 16)/255.0)
+		VAL_B = (int(val_b, 16)/255.0)
+		
+		LINE_R = (int(line_r, 16)/255.0)
+		LINE_G = (int(line_g, 16)/255.0)
+		LINE_B = (int(line_b, 16)/255.0)
+		
+		BG_R = (int(bg_r, 16)/255.0)
+		BG_G = (int(bg_g, 16)/255.0)
+		BG_B = (int(bg_b, 16)/255.0)
 
-cr.restore()
-cr.show_page()
-surface.finish()
+		surface = cairo.PDFSurface (filename, self.width, self.height)
+		cr = cairo.Context(surface)
+		
+		cr.save()
+		
+		cr.select_font_face(self.FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+		cr.set_font_size(self.FONT_SIZE)
+		
+		cr.set_line_width(self.LINE_WIDTH)
+		
+		cr.set_source_rgb(BG_R,BG_G,BG_B)
+		cr.rectangle(0,0,self.width,self.height)
+		cr.fill()
+		
+		# draw start labels at the correct positions
+		
+		valueFormatString = config["value_format_string"]
+		
+		for k in sorted(self.startKeys):
+		
+			val = float(k)
+			label = self.starts[k]
+			xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
+			xbearing, ybearing, kWidth, kHeight, xadvance, yadvance = (cr.text_extents(valueFormatString % (val)))
+		
+			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
+			cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.show_text(label)
+			
+			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
+			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.show_text(valueFormatString % (val))
+			
+			cr.stroke()
+		
+		# draw end labels at the correct positions
+		
+		for k in sorted(self.endKeys):
+		
+			val = float(k)
+			label = self.ends[k]
+			xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
+				
+			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
+			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.show_text(valueFormatString % (val))
+		
+			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
+			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.show_text(label)
+		
+			cr.stroke()
+		
+		# do the actual plotting
+		
+		cr.set_line_width(self.LINE_WIDTH)
+		cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
+		
+		for s1,e1 in self.pairs:
+			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+			cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+			cr.stroke()
+		
+		cr.restore()
+		cr.show_page()
+		surface.finish()	
+		
+	
+	def __init__(self, config):
+	
+		# a couple methods need these so make them local to the class
+	
+		self.FONT_FAMILY = config["font_family"]
+		self.LINE_WIDTH = float(config["line_width"])
+		self.X_MARGIN = float(config["x_margin"])
+		self.Y_MARGIN = float(config["y_margin"])
+		self.FONT_SIZE = float(config["font_size"])
+		self.SPACE_WIDTH = self.FONT_SIZE / 2.0
+		self.LINE_HEIGHT = self.FONT_SIZE + (self.FONT_SIZE / 2.0)
+		self.LINE_START_DELTA = 1.5*self.SPACE_WIDTH
+		
+		OUTPUT_FILE = config["output"] + "." + config["format"]
+		
+		# process the values & make the slopegraph
+		
+		self.readCSV(config["input"])
+		self.sortKeys()
+		self.findExtremes()
+		self.calculateExtents(OUTPUT_FILE, config["format"], config["value_format_string"])
+		self.makeSlopegraph(OUTPUT_FILE, config)
+		
+
+def main():
+
+	parser = argparse.ArgumentParser(description="Creates a slopegraph from a CSV source")
+	parser.add_argument("--config",required=True,
+					help="config file name to use for  slopegraph creation",)
+	args = parser.parse_args()
+
+	if args.config:
+	
+		json_data = open(args.config)
+		config = json.load(json_data)
+		json_data.close()
+		
+		Slopegraph(config)
+
+	return(0)
+	
+if __name__ == "__main__":
+	main()
