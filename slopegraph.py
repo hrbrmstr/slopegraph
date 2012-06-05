@@ -53,6 +53,9 @@
 # 2012-06-05 - 0.9.0 - Output to SVG/PS/PDF/PNG ; allow for "background_color" : "transparent";
 #                      Added header labels/theming; added MIT license
 #
+# 2012-06-05 - 0.9.1 - Bugfix. I keep forgetting Python isn't as cool as Perl when it comes to
+#                      dictionaries/associative arrays
+#
 
 import csv
 import cairo
@@ -245,29 +248,31 @@ class Slopegraph:
 			cr.fill()
 			
 		# draw headers (if present)
+		
+		if (self.HEADER_FONT_FAMILY != None):
 			
-		(header_r,header_g,header_b) = split(config["header_color"],2)		
-		HEADER_R = (int(header_r, 16)/255.0)
-		HEADER_G = (int(header_g, 16)/255.0)
-		HEADER_B = (int(header_b, 16)/255.0)
-		
-		cr.save()
-		
-		cr.select_font_face(self.HEADER_FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
-		cr.set_font_size(self.HEADER_FONT_SIZE)
-		cr.set_source_rgb(HEADER_R,HEADER_G,HEADER_B)
-		
-		xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][0]))			
-		cr.move_to(self.X_MARGIN + self.sWidth - hWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
-		cr.show_text(config["labels"][0])
-		
-		xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][1]))			
-		cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
-		cr.show_text(config["labels"][1])
-
-		cr.stroke()
-
-		cr.restore()
+			(header_r,header_g,header_b) = split(config["header_color"],2)		
+			HEADER_R = (int(header_r, 16)/255.0)
+			HEADER_G = (int(header_g, 16)/255.0)
+			HEADER_B = (int(header_b, 16)/255.0)
+			
+			cr.save()
+			
+			cr.select_font_face(self.HEADER_FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+			cr.set_font_size(self.HEADER_FONT_SIZE)
+			cr.set_source_rgb(HEADER_R,HEADER_G,HEADER_B)
+			
+			xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][0]))			
+			cr.move_to(self.X_MARGIN + self.sWidth - hWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
+			cr.show_text(config["labels"][0])
+			
+			xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][1]))			
+			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
+			cr.show_text(config["labels"][1])
+	
+			cr.stroke()
+	
+			cr.restore()
 				
 		# draw start labels at the correct positions
 		
@@ -335,15 +340,22 @@ class Slopegraph:
 	
 		self.LABEL_FONT_FAMILY = config["label_font_family"]
 		self.LABEL_FONT_SIZE = float(config["label_font_size"])
-		self.HEADER_FONT_FAMILY = config["header_font_family"]
-		self.HEADER_FONT_SIZE = float(config["header_font_size"])
+		
+		if "header_font_family" in config:
+			self.HEADER_FONT_FAMILY = config["header_font_family"]
+			self.HEADER_FONT_SIZE = float(config["header_font_size"])
+		else:
+			self.HEADER_FONT_FAMILY = None
+			self.HEADER_FONT_SIZE = None
+			
 		self.X_MARGIN = float(config["x_margin"])
 		self.Y_MARGIN = float(config["y_margin"])
 		self.LINE_WIDTH = float(config["line_width"])
-		self.SLOPE_LENGTH = float(config["slope_length"])
-		
-		if (self.SLOPE_LENGTH == None): self.SLOPE_LENGTH = 300
 
+		if "slope_length" in config:
+			self.SLOPE_LENGTH = float(config["slope_length"])
+		else:
+			self.SLOPE_LENGTH = 300
 
 		self.SPACE_WIDTH = self.LABEL_FONT_SIZE / 2.0
 		self.LINE_HEIGHT = self.LABEL_FONT_SIZE + (self.LABEL_FONT_SIZE / 2.0)
