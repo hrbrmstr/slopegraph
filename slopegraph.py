@@ -8,6 +8,33 @@
 #
 # Find out more about & download Cairo here: http://cairographics.org/
 #
+# If you do end up using this code, pls send a tweet to @hrbrmstr :-)
+# 
+########################################################################
+#
+# Copyright (c) 2012 Bob Rudis, @hrbrmstr, http://rud.is/
+# 
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+# 
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+# LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+# WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+########################################################################
+# 
 # 2012-05-28 - 0.5.0 - Initial github release. Still needs some polish
 # 2012-05-29 - 0.6.0 - Value labels now align; Added object colors; Changed example to use serif
 # 2012-05-30 - 0.7.0 - Corrected slope start/end points; calculates label widths accurately now
@@ -23,6 +50,8 @@
 #                      code directly, it still only supports PDF output and you'll have to remove the
 #                      background fill code if you want a transparent background. Those options are
 #                      coming.
+# 2012-06-05 - 0.9.0 - Output to SVG/PS/PDF/PNG ; allow for "background_color" : "transparent";
+#                      Added header labels/theming; added MIT license
 #
 
 import csv
@@ -34,8 +63,6 @@ def split(input, size):
 	return [input[start:start+size] for start in range(0, len(input), size)]
 
 class Slopegraph:
-
-	SLOPEGRAPH_CANVAS_SIZE = 300
 
 	starts = {} # starting "points"
 	ends = {} # ending "points"
@@ -112,11 +139,22 @@ class Slopegraph:
 	
 	def calculateExtents(self, filename, format, valueFormatString):
 	
-		surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
-		cr = cairo.Context (surface)
+		if (format == "pdf"):
+			surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
+		elif (format == "ps"):
+			surface = cairo.PSSurface(filename, 8.5*72, 11*72)
+			surface.set_eps(True)
+		elif (format == "svg"):
+			surface = cairo.SVGSurface (filename, 8.5*72, 11*72)
+		elif (format == "png"):
+			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(8.5*72), int(11*72))
+		else:
+			surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
+
+		cr = cairo.Context(surface)
 		cr.save()
-		cr.select_font_face(self.FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-		cr.set_font_size(self.FONT_SIZE)
+		cr.select_font_face(self.LABEL_FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+		cr.set_font_size(self.LABEL_FONT_SIZE)
 		cr.set_line_width(self.LINE_WIDTH)
 		
 		# find the *real* maximum label width (not just based on number of chars)
@@ -151,48 +189,90 @@ class Slopegraph:
 		cr.show_page()
 		surface.finish()
 		
-		self.width = self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.SPACE_WIDTH + self.SLOPEGRAPH_CANVAS_SIZE + self.SPACE_WIDTH + self.endMaxLabelWidth + self.SPACE_WIDTH + self.eWidth + self.X_MARGIN ;
+		self.width = self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.SPACE_WIDTH + self.SLOPE_LENGTH + self.SPACE_WIDTH + self.endMaxLabelWidth + self.SPACE_WIDTH + self.eWidth + self.X_MARGIN ;
 		self.height = (self.Y_MARGIN * 2) + (((self.highest - self.lowest) / self.delta) * self.LINE_HEIGHT)
+		
+		self.HEADER_SPACE = 0.0
+		if (self.HEADER_FONT_FAMILY != None):
+			self.HEADER_SPACE = self.HEADER_FONT_SIZE + 2*self.LINE_HEIGHT
+			self.height += self.HEADER_SPACE
 		
 		
 	def makeSlopegraph(self, filename, config):
 	
-		(lab_r,lab_g,lab_b) = split(config["label_color"],2)
-		(val_r,val_g,val_b) = split(config["value_color"],2)
-		(line_r,line_g,line_b) = split(config["slope_color"],2)
-		(bg_r,bg_g,bg_b) = split(config["background_color"],2)
-		
+		(lab_r,lab_g,lab_b) = split(config["label_color"],2)		
 		LAB_R = (int(lab_r, 16)/255.0)
 		LAB_G = (int(lab_g, 16)/255.0)
 		LAB_B = (int(lab_b, 16)/255.0)
 		
+		(val_r,val_g,val_b) = split(config["value_color"],2)
 		VAL_R = (int(val_r, 16)/255.0)
 		VAL_G = (int(val_g, 16)/255.0)
 		VAL_B = (int(val_b, 16)/255.0)
 		
+		(line_r,line_g,line_b) = split(config["slope_color"],2)
 		LINE_R = (int(line_r, 16)/255.0)
 		LINE_G = (int(line_g, 16)/255.0)
 		LINE_B = (int(line_b, 16)/255.0)
 		
-		BG_R = (int(bg_r, 16)/255.0)
-		BG_G = (int(bg_g, 16)/255.0)
-		BG_B = (int(bg_b, 16)/255.0)
-
-		surface = cairo.PDFSurface (filename, self.width, self.height)
+		if (config["background_color"] != "transparent"):
+			(bg_r,bg_g,bg_b) = split(config["background_color"],2)
+			BG_R = (int(bg_r, 16)/255.0)
+			BG_G = (int(bg_g, 16)/255.0)
+			BG_B = (int(bg_b, 16)/255.0)
+	
+		if (config['format'] == "pdf"):
+			surface = cairo.PDFSurface (filename, self.width, self.height)
+		elif (config['format'] == "ps"):
+			surface = cairo.PSSurface(filename, self.width, self.height)
+			surface.set_eps(True)
+		elif (config['format'] == "svg"):
+			surface = cairo.SVGSurface (filename, self.width, self.height)
+		elif (config['format'] == "png"):
+			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(self.width), int(self.height))
+		else:
+			surface = cairo.PDFSurface (filename, self.width, self.height)
+			
 		cr = cairo.Context(surface)
 		
 		cr.save()
 		
-		cr.select_font_face(self.FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-		cr.set_font_size(self.FONT_SIZE)
-		
 		cr.set_line_width(self.LINE_WIDTH)
+
+		if (config["background_color"] != "transparent"):
+			cr.set_source_rgb(BG_R,BG_G,BG_B)
+			cr.rectangle(0,0,self.width,self.height)
+			cr.fill()
+			
+		# draw headers (if present)
+			
+		(header_r,header_g,header_b) = split(config["header_color"],2)		
+		HEADER_R = (int(header_r, 16)/255.0)
+		HEADER_G = (int(header_g, 16)/255.0)
+		HEADER_B = (int(header_b, 16)/255.0)
 		
-		cr.set_source_rgb(BG_R,BG_G,BG_B)
-		cr.rectangle(0,0,self.width,self.height)
-		cr.fill()
+		cr.save()
 		
+		cr.select_font_face(self.HEADER_FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+		cr.set_font_size(self.HEADER_FONT_SIZE)
+		cr.set_source_rgb(HEADER_R,HEADER_G,HEADER_B)
+		
+		xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][0]))			
+		cr.move_to(self.X_MARGIN + self.sWidth - hWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
+		cr.show_text(config["labels"][0])
+		
+		xbearing, ybearing, hWidth, hHeight, xadvance, yadvance = (cr.text_extents(config["labels"][1]))			
+		cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE)
+		cr.show_text(config["labels"][1])
+
+		cr.stroke()
+
+		cr.restore()
+				
 		# draw start labels at the correct positions
+		
+		cr.select_font_face(self.LABEL_FONT_FAMILY, cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+		cr.set_font_size(self.LABEL_FONT_SIZE)
 		
 		valueFormatString = config["value_format_string"]
 		
@@ -204,11 +284,11 @@ class Slopegraph:
 			xbearing, ybearing, kWidth, kHeight, xadvance, yadvance = (cr.text_extents(valueFormatString % (val)))
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-			cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(label)
 			
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(valueFormatString % (val))
 			
 			cr.stroke()
@@ -222,11 +302,11 @@ class Slopegraph:
 			xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
 				
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(valueFormatString % (val))
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(label)
 		
 			cr.stroke()
@@ -237,26 +317,36 @@ class Slopegraph:
 		cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
 		
 		for s1,e1 in self.pairs:
-			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
-			cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+			cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 			cr.stroke()
 		
 		cr.restore()
 		cr.show_page()
-		surface.finish()	
 		
+		if (config['format'] == "png"):
+			surface.write_to_png(filename)
+		
+		surface.finish()	
 	
 	def __init__(self, config):
 	
-		# a couple methods need these so make them local to the class
+		# since some methods need these, make them local to the class
 	
-		self.FONT_FAMILY = config["font_family"]
-		self.LINE_WIDTH = float(config["line_width"])
+		self.LABEL_FONT_FAMILY = config["label_font_family"]
+		self.LABEL_FONT_SIZE = float(config["label_font_size"])
+		self.HEADER_FONT_FAMILY = config["header_font_family"]
+		self.HEADER_FONT_SIZE = float(config["header_font_size"])
 		self.X_MARGIN = float(config["x_margin"])
 		self.Y_MARGIN = float(config["y_margin"])
-		self.FONT_SIZE = float(config["font_size"])
-		self.SPACE_WIDTH = self.FONT_SIZE / 2.0
-		self.LINE_HEIGHT = self.FONT_SIZE + (self.FONT_SIZE / 2.0)
+		self.LINE_WIDTH = float(config["line_width"])
+		self.SLOPE_LENGTH = float(config["slope_length"])
+		
+		if (self.SLOPE_LENGTH == None): self.SLOPE_LENGTH = 300
+
+
+		self.SPACE_WIDTH = self.LABEL_FONT_SIZE / 2.0
+		self.LINE_HEIGHT = self.LABEL_FONT_SIZE + (self.LABEL_FONT_SIZE / 2.0)
 		self.LINE_START_DELTA = 1.5*self.SPACE_WIDTH
 		
 		OUTPUT_FILE = config["output"] + "." + config["format"]

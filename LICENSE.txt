@@ -1,23 +1,3 @@
-I've been wanting to throw together some non-R code to make basic
-slopegraphs for quite some time. Python seems to be a bit
-more accessible to folks, so it seemed like the logical choice, 
-especially given how spiffy the Cairo framework is.
-
-If you're not familiar with slopegraphs, this effort was designed to
-produce something similar to the one found here:
-
-http://www.edwardtufte.com/bboard/q-and-a-fetch-msg?msg_id=0003nk
-
-Just scroll down a bit to find the graph that looks similar with the
-life expectancy data (the "television" data in the "examples" 
-directory).
-
-I haven't included much outside of stock 2.7.x libraries, so all you 
-should need is Cairo (http://cairographics.org/) to get the code up 
-and running on any platform.
-
-Releasing it all under the MIT license:
-
 Copyright (c) 2012 Bob Rudis, @hrbrmstr, http://rud.is/
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -38,5 +18,3 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
