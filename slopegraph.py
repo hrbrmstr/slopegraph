@@ -56,6 +56,9 @@
 # 2012-06-05 - 0.9.1 - Bugfix. I keep forgetting Python isn't as cool as Perl when it comes to
 #                      dictionaries/associative arrays
 #
+# 2012-06-05 - 0.9.2 - Tweaked config files; created Makefile (for examples); added "slope_up_color" &
+#                      "slope_down_color" configuration options and a new test config
+#
 
 import csv
 import cairo
@@ -83,7 +86,7 @@ class Slopegraph:
 			beg = float(row[1]) # left vals
 			end = float(row[2]) # right vals
 			
-			self.pairs.append( (float(beg), float(end)) )
+			self.pairs.append( (float(beg), float(end), (float(end) - float(beg))) )
 		
 			# combine labels of common values into one string
 		
@@ -138,21 +141,20 @@ class Slopegraph:
 		self.delta = float(self.delta)
 		self.lowest = float(self.lowest)
 		self.highest = float(self.highest)
-
 	
 	def calculateExtents(self, filename, format, valueFormatString):
 	
 		if (format == "pdf"):
-			surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
+			surface = cairo.PDFSurface (filename, self.TMP_W, self.TMP_H)
 		elif (format == "ps"):
-			surface = cairo.PSSurface(filename, 8.5*72, 11*72)
+			surface = cairo.PSSurface(filename, self.TMP_W, self.TMP_H)
 			surface.set_eps(True)
 		elif (format == "svg"):
-			surface = cairo.SVGSurface (filename, 8.5*72, 11*72)
+			surface = cairo.SVGSurface (filename, self.TMP_W, self.TMP_H)
 		elif (format == "png"):
-			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(8.5*72), int(11*72))
+			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(self.TMP_W), int(self.TMP_H))
 		else:
-			surface = cairo.PDFSurface (filename, 8.5*72, 11*72)
+			surface = cairo.PDFSurface (filename, self.TMP_W, self.TMP_H)
 
 		cr = cairo.Context(surface)
 		cr.save()
@@ -203,27 +205,37 @@ class Slopegraph:
 		
 	def makeSlopegraph(self, filename, config):
 	
-		(lab_r,lab_g,lab_b) = split(config["label_color"],2)		
+		(lab_r,lab_g,lab_b) = split(self.LABEL_COLOR,2)		
 		LAB_R = (int(lab_r, 16)/255.0)
 		LAB_G = (int(lab_g, 16)/255.0)
 		LAB_B = (int(lab_b, 16)/255.0)
 		
-		(val_r,val_g,val_b) = split(config["value_color"],2)
+		(val_r,val_g,val_b) = split(self.VALUE_COLOR,2)
 		VAL_R = (int(val_r, 16)/255.0)
 		VAL_G = (int(val_g, 16)/255.0)
 		VAL_B = (int(val_b, 16)/255.0)
 		
-		(line_r,line_g,line_b) = split(config["slope_color"],2)
+		(line_r,line_g,line_b) = split(self.SLOPE_COLOR,2)
 		LINE_R = (int(line_r, 16)/255.0)
 		LINE_G = (int(line_g, 16)/255.0)
 		LINE_B = (int(line_b, 16)/255.0)
 		
-		if (config["background_color"] != "transparent"):
-			(bg_r,bg_g,bg_b) = split(config["background_color"],2)
+		(line_up_r,line_up_g,line_up_b) = split(self.SLOPE_UP_COLOR,2)
+		LINE_UP_R = (int(line_up_r, 16)/255.0)
+		LINE_UP_G = (int(line_up_g, 16)/255.0)
+		LINE_UP_B = (int(line_up_b, 16)/255.0)
+		
+		(line_down_r,line_down_g,line_down_b) = split(self.SLOPE_DOWN_COLOR,2)
+		LINE_DOWN_R = (int(line_down_r, 16)/255.0)
+		LINE_DOWN_G = (int(line_down_g, 16)/255.0)
+		LINE_DOWN_B = (int(line_down_b, 16)/255.0)
+		
+		if (self.BACKGROUND_COLOR != "transparent"):
+			(bg_r,bg_g,bg_b) = split(self.BACKGROUND_COLOR,2)
 			BG_R = (int(bg_r, 16)/255.0)
 			BG_G = (int(bg_g, 16)/255.0)
 			BG_B = (int(bg_b, 16)/255.0)
-	
+
 		if (config['format'] == "pdf"):
 			surface = cairo.PDFSurface (filename, self.width, self.height)
 		elif (config['format'] == "ps"):
@@ -242,7 +254,7 @@ class Slopegraph:
 		
 		cr.set_line_width(self.LINE_WIDTH)
 
-		if (config["background_color"] != "transparent"):
+		if (self.BACKGROUND_COLOR != "transparent"):
 			cr.set_source_rgb(BG_R,BG_G,BG_B)
 			cr.rectangle(0,0,self.width,self.height)
 			cr.fill()
@@ -251,7 +263,7 @@ class Slopegraph:
 		
 		if (self.HEADER_FONT_FAMILY != None):
 			
-			(header_r,header_g,header_b) = split(config["header_color"],2)		
+			(header_r,header_g,header_b) = split(self.HEADER_COLOR,2)		
 			HEADER_R = (int(header_r, 16)/255.0)
 			HEADER_G = (int(header_g, 16)/255.0)
 			HEADER_B = (int(header_b, 16)/255.0)
@@ -321,7 +333,13 @@ class Slopegraph:
 		cr.set_line_width(self.LINE_WIDTH)
 		cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
 		
-		for s1,e1 in self.pairs:
+		for s1,e1,slope_val in self.pairs:
+			if (slope_val > 0):
+				cr.set_source_rgb(LINE_UP_R, LINE_UP_G, LINE_UP_B)
+			elif (slope_val < 0):
+				cr.set_source_rgb(LINE_DOWN_R, LINE_DOWN_G, LINE_DOWN_B)
+			else:
+				cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
 			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 			cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 			cr.stroke()
@@ -338,15 +356,37 @@ class Slopegraph:
 	
 		# since some methods need these, make them local to the class
 	
+		# height/width of page for extents calc (tmp surface)
+		self.TMP_W = 8.5 * 72
+		self.TMP_H = 11.0 * 72
+		
 		self.LABEL_FONT_FAMILY = config["label_font_family"]
 		self.LABEL_FONT_SIZE = float(config["label_font_size"])
+		
+		self.LABEL_COLOR = config["label_color"]
+		self.VALUE_COLOR = config["value_color"]
+		self.BACKGROUND_COLOR = config["background_color"]
 		
 		if "header_font_family" in config:
 			self.HEADER_FONT_FAMILY = config["header_font_family"]
 			self.HEADER_FONT_SIZE = float(config["header_font_size"])
+			self.HEADER_COLOR = config["header_color"]
 		else:
 			self.HEADER_FONT_FAMILY = None
 			self.HEADER_FONT_SIZE = None
+			self.HEADER_COLOR = None
+
+		self.SLOPE_COLOR = config["slope_color"]
+
+		if "slope_up_color" in config:
+			self.SLOPE_UP_COLOR = config["slope_up_color"]
+		else:
+			self.SLOPE_UP_COLOR = config["slope_color"]
+		
+		if "slope_down_color" in config:
+			self.SLOPE_DOWN_COLOR = config["slope_down_color"]
+		else:
+			self.SLOPE_DOWN_COLOR = config["slope_color"]
 			
 		self.X_MARGIN = float(config["x_margin"])
 		self.Y_MARGIN = float(config["y_margin"])
