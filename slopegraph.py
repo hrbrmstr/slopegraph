@@ -36,32 +36,52 @@
 ########################################################################
 # 
 # 2012-05-28 - 0.5.0 - Initial github release. Still needs some polish
-# 2012-05-29 - 0.6.0 - Value labels now align; Added object colors; Changed example to use serif
-# 2012-05-30 - 0.7.0 - Corrected slope start/end points; calculates label widths accurately now
-#                      Also tossed in some data set "anomalies" for testing purposes
-# 2012-05-31 - 0.7.1 - New sample data file to play with; new theme sample; formatting tweaks & fixes
-#                      Added hashbang; moved font family to variable in prep for refactor
-# 2012-06-02 - 0.8.0 - Refactored into a more pythonic format; it's now "config"-file based
-#                      (see the README for details) and part of that also allows for sprintf-like
-#                      formatting of the value part of the label as well as being able to specify
-#                      the theme colors in the standard RGB hex string format. The code now assumes
-#                      LABEL,COL1VAL,COL2VAL as the CSV input in preparation for an arbitrary # of
-#                      columns (though I suspect 4 might be the most useful max). Without hacking the
-#                      code directly, it still only supports PDF output and you'll have to remove the
-#                      background fill code if you want a transparent background. Those options are
-#                      coming.
-# 2012-06-05 - 0.9.0 - Output to SVG/PS/PDF/PNG ; allow for "background_color" : "transparent";
+#                      
+# 2012-05-29 - 0.6.0 - Value labels now align; Added object colors; 
+#                      Changed example to use serif
+#                      
+# 2012-05-30 - 0.7.0 - Corrected slope start/end points; calculates 
+#                      label widths accurately now
+#                      Also tossed in some data set "anomalies" for 
+#                      testing purposes
+#                      
+# 2012-05-31 - 0.7.1 - New sample data file to play with; new theme 
+#                      sample; formatting tweaks & fixes
+#                      Added hashbang; moved font family to variable in 
+#                      prep for refactor
+#                      
+# 2012-06-02 - 0.8.0 - Refactored into a more pythonic format; it's now 
+#                      "config"-file based (see the README for details)
+#                      and part of that also allows for sprintf-like
+#                      formatting of the value part of the label as well 
+#                      as being able to specify the theme colors in the 
+#                      standard RGB hex string format. The code now
+#                      assumes LABEL,COL1VAL,COL2VAL as the CSV input in 
+#                      preparation for an arbitrary # of columns (though 
+#                      I suspect 4 might be the most useful max). Without 
+#                      hacking the code directly, it still only supports 
+#                      PDF output and you'll have to remove the background
+#                      fill code if you want a transparent background. 
+#                      Those options are coming.
+#                     
+# 2012-06-05 - 0.9.0 - Output to SVG/PS/PDF/PNG ; allow for
+#                      "background_color" : "transparent";
 #                      Added header labels/theming; added MIT license
 #
-# 2012-06-05 - 0.9.1 - Bugfix. I keep forgetting Python isn't as cool as Perl when it comes to
-#                      dictionaries/associative arrays
+# 2012-06-05 - 0.9.1 - Bugfix. I keep forgetting Python isn't as cool as
+#                      Perl when it comes to dictionaries/associative arrays
 #
-# 2012-06-05 - 0.9.2 - Tweaked config files; created Makefile (for examples); added "slope_up_color" &
-#                      "slope_down_color" configuration options and a new test config
+# 2012-06-05 - 0.9.2 - Tweaked config files; created Makefile (for
+#                      examples); added "slope_up_color" &
+#                      "slope_down_color" configuration options and a
+#                      new test config
 #
-# 2012-06-06 - 0.9.3 - Changed main class name to "PySlopegraph"; added "log_scale" option to use
-#                      log scales for slopegraph axes; added "round_precision" option to make it 
-#                      easier to "play" with axes value scaling
+# 2012-06-06 - 0.9.3 - Changed main class name to "PySlopegraph";
+#                      added "log_scale" option to use log scales for 
+#                      slopegraph axes; added "round_precision" option 
+#                      to make it  easier to "play" with axes value scaling
+#
+# 2012-06-08 - 0.9.4 - Experimental Raphael support (http://raphaeljs.com/)
 #
 
 import csv
@@ -69,6 +89,8 @@ import cairo
 import argparse
 import json
 import math
+
+NULL_PATH = "/dev/null"
 
 def split(input, size):
 	return [input[start:start+size] for start in range(0, len(input), size)]
@@ -179,6 +201,8 @@ class PySlopegraph:
 			surface = cairo.SVGSurface (filename, self.TMP_W, self.TMP_H)
 		elif (format == "png"):
 			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(self.TMP_W), int(self.TMP_H))
+		elif (format == "js"):
+			surface = cairo.SVGSurface (NULL_PATH, self.TMP_W, self.TMP_H)
 		else:
 			surface = cairo.PDFSurface (filename, self.TMP_W, self.TMP_H)
 
@@ -269,6 +293,28 @@ class PySlopegraph:
 			surface.set_eps(True)
 		elif (config['format'] == "svg"):
 			surface = cairo.SVGSurface (filename, self.width, self.height)
+		elif (config['format'] == "js"):
+			surface = cairo.SVGSurface (NULL_PATH, self.width, self.height)
+			paper = """
+<html>
+   <head>
+        <title></title>
+        <script type="text/javascript" src="raphael-min.js"></script>
+        <style type="text/css">
+            #surface {
+                width: %d;
+            }
+        </style>
+        <script>
+			window.onload = function() {  
+			
+				var surface = new Raphael(document.getElementById('surface'), %d, %d);
+				var headers = new Array();
+				var lines = new Array();
+				var labels = new Array() ;
+				var values = new Array() ;
+""" % (self.width, self.width, self.height)
+
 		elif (config['format'] == "png"):
 			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(self.width), int(self.height))
 		else:
@@ -284,6 +330,8 @@ class PySlopegraph:
 			cr.set_source_rgb(BG_R,BG_G,BG_B)
 			cr.rectangle(0,0,self.width,self.height)
 			cr.fill()
+			if (config['format'] == 'js'):
+				paper += "				surface.rect(0,0,%s,%s).attr({fill:'#%s',stroke:'#%s'});\n" % (self.width,self.height,self.BACKGROUND_COLOR,self.BACKGROUND_COLOR)
 			
 		# draw headers (if present)
 		
@@ -311,6 +359,11 @@ class PySlopegraph:
 			cr.stroke()
 	
 			cr.restore()
+			
+			if (config['format'] == 'js'):
+				paper += "				headers[0] = surface.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][0], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE, self.HEADER_COLOR)
+				paper += "				headers[1] = surface.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][1], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE,self.HEADER_COLOR)
+
 				
 		# draw start labels at the correct positions
 		
@@ -329,15 +382,23 @@ class PySlopegraph:
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
 			if self.LOG_SCALE:
 				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			else:
 				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			cr.show_text(label)
 			
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
 			if self.LOG_SCALE:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (valueFormatString % (val)), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			else:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (val)) * self.LINE_HEIGHT * (1/self.delta), (valueFormatString % (val)), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			cr.show_text(valueFormatString % (val))
 			
 			cr.stroke()
@@ -353,15 +414,23 @@ class PySlopegraph:
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
 			if self.LOG_SCALE:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (valueFormatString % (val)), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			else:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), (valueFormatString % (val)), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			cr.show_text(valueFormatString % (val))
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
 			if self.LOG_SCALE:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			else:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+				if (config['format'] == 'js'):
+					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			cr.show_text(label)
 		
 			cr.stroke()
@@ -371,21 +440,33 @@ class PySlopegraph:
 		cr.set_line_width(self.LINE_WIDTH)
 		cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
 		
+		slopeColor = self.SLOPE_COLOR
+		
+		lineCount = 0 
 		for s1,e1,slope_val in self.pairs:
 		
 			if (slope_val > 0):
 				cr.set_source_rgb(LINE_UP_R, LINE_UP_G, LINE_UP_B)
+				slopeColor = self.SLOPE_UP_COLOR
 			elif (slope_val < 0):
 				cr.set_source_rgb(LINE_DOWN_R, LINE_DOWN_G, LINE_DOWN_B)
+				slopeColor = self.SLOPE_DOWN_COLOR
 			else:
 				cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
+				slopeColor = self.SLOPE_COLOR
 
 			if self.LOG_SCALE:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+				if (config['format'] == 'js'):
+					paper += "				lines[%s] = surface.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)				
 			else:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+				if (config['format'] == 'js'):
+					paper += "				lines[%s] = surface.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)
+
+			lineCount += 1
 
 			cr.stroke()
 		
@@ -394,6 +475,18 @@ class PySlopegraph:
 		
 		if (config['format'] == "png"):
 			surface.write_to_png(filename)
+		elif (config['format'] == 'js'):
+
+			paper += """			}  
+        </script>
+    </head>
+    <body>
+        <div id="surface"></div>
+    </body>
+</html>
+"""
+			with open(filename+".html", 'w') as f:
+				f.write(paper)
 		
 		surface.finish()	
 	

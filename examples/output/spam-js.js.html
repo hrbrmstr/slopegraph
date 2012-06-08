@@ -1,0 +1,98 @@
+
+<html>
+   <head>
+        <title></title>
+        <script type="text/javascript" src="raphael-min.js"></script>
+        <style type="text/css">
+            #surface {
+                width: 672;
+            }
+        </style>
+        <script>
+			window.onload = function() {  
+			
+				var surface = new Raphael(document.getElementById('surface'), 672, 1616);
+				var headers = new Array();
+				var lines = new Array();
+				var labels = new Array() ;
+				var values = new Array() ;
+				surface.rect(0,0,672.10546875,1616.86513065).attr({fill:'#F2F1EB',stroke:'#F2F1EB'});
+				headers[0] = surface.text(109, 44, 'April 2011').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#262222','text-anchor':'end'});
+				headers[1] = surface.text(534, 44, 'March 2012').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#262222','text-anchor':'start'});
+				surface.text(109, 1532, 'Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 1532, '  1500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 1281, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 1281, '  3500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 1260, 'Australia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 1260, '  3750000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 969, 'Germany; Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 969, ' 10000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 941, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 941, ' 11000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 869, 'Argentina; Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 869, ' 14000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 794, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 794, ' 18000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 728, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 728, ' 22500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 413, 'Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 413, ' 65000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 391, 'Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 391, ' 70000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 352, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 352, ' 80000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 317, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 317, ' 90000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 285, 'Brazil').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 285, '100000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(109, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#262222','text-anchor':'end'});
+				surface.text(169, 80, '200000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#BFB9A4','text-anchor':'end'});
+				surface.text(475, 1586, '  1250000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1586, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 1532, '  1500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1532, 'Australia; Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 1121, '  6000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1121, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 1075, '  7000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1075, 'Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 1035, '  8000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1035, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 1000, '  9000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 1000, 'Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 969, ' 10000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 969, 'Argentina; Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 903, ' 12500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 903, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 869, ' 14000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 869, 'Germany').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 763, ' 20000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 763, 'Brazil; Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 557, ' 40000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 557, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 539, ' 42500000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 539, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				surface.text(475, 80, '200000000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#BFB9A4','text-anchor':'start'});
+				surface.text(534, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#262222','text-anchor':'start'});
+				lines[0] = surface.path('M 178.140625 867.30842083 L 472.140625 967.210079227').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[1] = surface.path('M 178.140625 1258.42717923 L 472.140625 1530.48220703').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[2] = surface.path('M 178.140625 283.551683809 L 472.140625 761.408395419').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[3] = surface.path('M 178.140625 726.437544001 L 472.140625 900.956735234').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[4] = surface.path('M 178.140625 792.690887994 L 472.140625 1118.87883942').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[5] = surface.path('M 178.140625 967.210079227 L 472.140625 867.30842083').attr({'stroke-width':1,stroke:'#802A30'});
+				lines[6] = surface.path('M 178.140625 314.834176384 L 472.140625 537.60671161').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[7] = surface.path('M 178.140625 389.45170922 L 472.140625 967.210079227').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[8] = surface.path('M 178.140625 967.210079227 L 472.140625 1073.11010464').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[9] = surface.path('M 178.140625 1530.48220703 L 472.140625 1530.48220703').attr({'stroke-width':1,stroke:'#222222'});
+				lines[10] = surface.path('M 178.140625 349.805027802 L 472.140625 555.60671161').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[11] = surface.path('M 178.140625 1278.91178845 L 472.140625 1584.61513065').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[12] = surface.path('M 178.140625 867.30842083 L 472.140625 998.492571802').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[13] = surface.path('M 178.140625 938.91162251 L 472.140625 1033.46342322').attr({'stroke-width':1,stroke:'#8C0303'});
+				lines[14] = surface.path('M 178.140625 77.75 L 472.140625 77.75').attr({'stroke-width':1,stroke:'#222222'});
+				lines[15] = surface.path('M 178.140625 411.45503821 L 472.140625 761.408395419').attr({'stroke-width':1,stroke:'#8C0303'});
+			}  
+        </script>
+    </head>
+    <body>
+        <div id="surface"></div>
+    </body>
+</html>
