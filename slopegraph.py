@@ -59,16 +59,21 @@
 # 2012-06-05 - 0.9.2 - Tweaked config files; created Makefile (for examples); added "slope_up_color" &
 #                      "slope_down_color" configuration options and a new test config
 #
+# 2012-06-06 - 0.9.3 - Changed main class name to "PySlopegraph"; added "log_scale" option to use
+#                      log scales for slopegraph axes; added "round_precision" option to make it 
+#                      easier to "play" with axes value scaling
+#
 
 import csv
 import cairo
 import argparse
 import json
-	
+import math
+
 def split(input, size):
 	return [input[start:start+size] for start in range(0, len(input), size)]
 
-class Slopegraph:
+class PySlopegraph:
 
 	starts = {} # starting "points"
 	ends = {} # ending "points"
@@ -85,6 +90,10 @@ class Slopegraph:
 			lab = row[0] # label
 			beg = float(row[1]) # left vals
 			end = float(row[2]) # right vals
+			
+			if self.ROUND_PRECISION != None:
+				beg = round(beg,self.ROUND_PRECISION)
+				end = round(end,self.ROUND_PRECISION)
 			
 			self.pairs.append( (float(beg), float(end), (float(end) - float(beg))) )
 		
@@ -114,30 +123,47 @@ class Slopegraph:
 		self.startKeys = sorted(self.starts.keys())
 		self.delta = max(self.startSorted)
 		for i in range(len(self.startKeys)):
+
 			if (i+1 <= len(self.startKeys)-1):
-				currDelta = float(self.startKeys[i+1]) - float(self.startKeys[i])
-				if (currDelta < self.delta):
-					self.delta = currDelta
+
+				if self.LOG_SCALE:
+					currDelta = math.log(float(self.startKeys[i+1])) - math.log(float(self.startKeys[i]))
+				else:
+					currDelta = float(self.startKeys[i+1]) - float(self.startKeys[i])
+
+				if (currDelta < self.delta): self.delta = currDelta
 					
 		self.endKeys = sorted(self.ends.keys())
 		for i in range(len(self.endKeys)):
+		
 			if (i+1 <= len(self.endKeys)-1):
-				currDelta = float(self.endKeys[i+1]) - float(self.endKeys[i])
-				if (currDelta < self.delta):
-					self.delta = currDelta
+
+				if self.LOG_SCALE:
+					currDelta = math.log(float(self.endKeys[i+1])) - math.log(float(self.endKeys[i]))
+				else:
+					currDelta = float(self.endKeys[i+1]) - float(self.endKeys[i])
+				
+				if (currDelta < self.delta): self.delta = currDelta
 
 
 	def findExtremes(self):
 	
 		# we also need to find the absolute min & max values
 		# so we know how to scale the plots
-		
-		self.lowest = min(self.startKeys)
-		if (min(self.endKeys) < self.lowest) : self.lowest = min(self.endKeys)
-		
-		self.highest = max(self.startKeys)
-		if (max(self.endKeys) > self.highest) : self.highest = max(self.endKeys)
-		
+				
+		if self.LOG_SCALE:
+			self.lowest = math.log(min(self.startKeys))
+			if (math.log(min(self.endKeys)) < self.lowest) : self.lowest = math.log(min(self.endKeys))
+			
+			self.highest = math.log(max(self.startKeys))
+			if (math.log(max(self.endKeys)) > self.highest) : self.highest = math.log(max(self.endKeys))
+		else:
+			self.lowest = min(self.startKeys)
+			if (min(self.endKeys) < self.lowest) : self.lowest = min(self.endKeys)
+			
+			self.highest = max(self.startKeys)
+			if (max(self.endKeys) > self.highest) : self.highest = max(self.endKeys)
+			
 		self.delta = float(self.delta)
 		self.lowest = float(self.lowest)
 		self.highest = float(self.highest)
@@ -301,11 +327,17 @@ class Slopegraph:
 			xbearing, ybearing, kWidth, kHeight, xadvance, yadvance = (cr.text_extents(valueFormatString % (val)))
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-			cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			if self.LOG_SCALE:
+				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+			else:
+				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(label)
 			
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			if self.LOG_SCALE:
+				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+			else:
+				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(valueFormatString % (val))
 			
 			cr.stroke()
@@ -319,11 +351,17 @@ class Slopegraph:
 			xbearing, ybearing, lWidth, lHeight, xadvance, yadvance = (cr.text_extents(label))
 				
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
-			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			if self.LOG_SCALE:
+				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+			else:
+				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(valueFormatString % (val))
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
-			cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
+			if self.LOG_SCALE:
+				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
+			else:
+				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 			cr.show_text(label)
 		
 			cr.stroke()
@@ -334,14 +372,21 @@ class Slopegraph:
 		cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
 		
 		for s1,e1,slope_val in self.pairs:
+		
 			if (slope_val > 0):
 				cr.set_source_rgb(LINE_UP_R, LINE_UP_G, LINE_UP_B)
 			elif (slope_val < 0):
 				cr.set_source_rgb(LINE_DOWN_R, LINE_DOWN_G, LINE_DOWN_B)
 			else:
 				cr.set_source_rgb(LINE_R, LINE_G, LINE_B)
-			cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
-			cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+
+			if self.LOG_SCALE:
+				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+			else:
+				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
+
 			cr.stroke()
 		
 		cr.restore()
@@ -396,6 +441,16 @@ class Slopegraph:
 			self.SLOPE_LENGTH = float(config["slope_length"])
 		else:
 			self.SLOPE_LENGTH = 300
+			
+		if "round_precision" in config:
+			self.ROUND_PRECISION = int(config["round_precision"])
+		else:
+			self.ROUND_PRECISION = None
+			
+		if "log_scale" in config:
+			self.LOG_SCALE = True
+		else:
+			self.LOG_SCALE = False
 
 		self.SPACE_WIDTH = self.LABEL_FONT_SIZE / 2.0
 		self.LINE_HEIGHT = self.LABEL_FONT_SIZE + (self.LABEL_FONT_SIZE / 2.0)
@@ -416,7 +471,7 @@ def main():
 
 	parser = argparse.ArgumentParser(description="Creates a slopegraph from a CSV source")
 	parser.add_argument("--config",required=True,
-					help="config file name to use for  slopegraph creation",)
+					help="config file name to use for slopegraph creation",)
 	args = parser.parse_args()
 
 	if args.config:
@@ -425,7 +480,7 @@ def main():
 		config = json.load(json_data)
 		json_data.close()
 		
-		Slopegraph(config)
+		PySlopegraph(config)
 
 	return(0)
 	
