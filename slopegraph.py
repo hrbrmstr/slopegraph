@@ -87,6 +87,11 @@
 #                      which makes large numbers look much nicer (see
 #                      "spam" examples)
 #
+# 2012-06-12 - 0.9.6 - Added a "raphael_surface_name" option which will
+#                      let the name of the div, style & javascript objects
+#                      be specified to support inclusion of multiple 
+#                      javascript slopegraphs on one page more easily.
+#
 
 import csv
 import cairo
@@ -323,19 +328,19 @@ class PySlopegraph:
         <title></title>
         <script type="text/javascript" src="raphael-min.js"></script>
         <style type="text/css">
-            #surface {
+            #%s {
                 width: %d;
             }
         </style>
         <script>
 			window.onload = function() {  
 			
-				var surface = new Raphael(document.getElementById('surface'), %d, %d);
+				var surface = new Raphael(document.getElementById('%s'), %d, %d);
 				var headers = new Array();
 				var lines = new Array();
 				var labels = new Array() ;
 				var values = new Array() ;
-""" % (self.width, self.width, self.height)
+""" % (self.RAPHAEL_SURFACE_NAME, self.width, self.RAPHAEL_SURFACE_NAME, self.width, self.height)
 
 		elif (config['format'] == "png"):
 			surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, int(self.width), int(self.height))
@@ -353,7 +358,7 @@ class PySlopegraph:
 			cr.rectangle(0,0,self.width,self.height)
 			cr.fill()
 			if (config['format'] == 'js'):
-				paper += "				surface.rect(0,0,%s,%s).attr({fill:'#%s',stroke:'#%s'});\n" % (self.width,self.height,self.BACKGROUND_COLOR,self.BACKGROUND_COLOR)
+				paper += "				%s.rect(0,0,%s,%s).attr({fill:'#%s',stroke:'#%s'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width,self.height,self.BACKGROUND_COLOR,self.BACKGROUND_COLOR)
 			
 		# draw headers (if present)
 		
@@ -383,8 +388,8 @@ class PySlopegraph:
 			cr.restore()
 			
 			if (config['format'] == 'js'):
-				paper += "				headers[0] = surface.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][0], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE, self.HEADER_COLOR)
-				paper += "				headers[1] = surface.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][1], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE,self.HEADER_COLOR)
+				paper += "				headers[0] = %s.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'end'});\n" % (self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][0], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE, self.HEADER_COLOR)
+				paper += "				headers[1] = %s.text(%d, %d, '%s').attr({'font':'%spx %s','font-family':'%s','font-size':'%d','font-weight':'bold','fill':'#%s','text-anchor':'start'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_FONT_SIZE, config["labels"][1], self.HEADER_FONT_SIZE, self.HEADER_FONT_FAMILY, self.HEADER_FONT_FAMILY, self.HEADER_FONT_SIZE,self.HEADER_COLOR)
 
 				
 		# draw start labels at the correct positions
@@ -409,11 +414,11 @@ class PySlopegraph:
 			if self.LOG_SCALE:
 				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			else:
 				cr.move_to(self.X_MARGIN + (self.sWidth - lWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			cr.show_text(label)
 			
 			cr.set_source_rgb(VAL_R,VAL_G,VAL_B)
@@ -425,11 +430,11 @@ class PySlopegraph:
 			if self.LOG_SCALE:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			else:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + (self.startMaxLabelWidth - kWidth), self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':'%d','fill':'#%s','text-anchor':'end'});\n" % (self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			cr.show_text(txt)
 			
 			cr.stroke()
@@ -450,22 +455,22 @@ class PySlopegraph:
 			if self.LOG_SCALE:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			else:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), (txt), self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.VALUE_COLOR)
 			cr.show_text(txt)
 		
 			cr.set_source_rgb(LAB_R,LAB_G,LAB_B)
 			if self.LOG_SCALE:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(val)) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			else:
 				cr.move_to(self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta))
 				if (config['format'] == 'js'):
-					paper += "				surface.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
+					paper += "				%s.text(%d, %d, '%s').attr({'font':'%dpx %s','font-family':'%s','font-size':%s,'fill':'#%s','text-anchor':'start'});\n" % (self.RAPHAEL_SURFACE_NAME, self.width - self.X_MARGIN - self.SPACE_WIDTH - self.eWidth , self.Y_MARGIN + self.HEADER_SPACE + (self.highest - val) * self.LINE_HEIGHT * (1/self.delta), label, self.LABEL_FONT_SIZE, self.LABEL_FONT_FAMILY, self.LABEL_FONT_FAMILY, self.LABEL_FONT_SIZE, self.LABEL_COLOR)
 			cr.show_text(label)
 		
 			cr.stroke()
@@ -494,12 +499,12 @@ class PySlopegraph:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				if (config['format'] == 'js'):
-					paper += "				lines[%s] = surface.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)				
+					paper += "				lines[%s] = %s.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - math.log(e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)				
 			else:
 				cr.move_to(self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - s1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				cr.line_to(self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - e1) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/4)
 				if (config['format'] == 'js'):
-					paper += "				lines[%s] = surface.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)
+					paper += "				lines[%s] = %s.path('M %s %s L %s %s').attr({'stroke-width':%s,stroke:'#%s'});\n" % (lineCount, self.RAPHAEL_SURFACE_NAME, self.X_MARGIN + self.sWidth + self.SPACE_WIDTH + self.startMaxLabelWidth + self.LINE_START_DELTA, self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (s1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8, self.width - self.X_MARGIN - self.eWidth - self.SPACE_WIDTH - self.endMaxLabelWidth - self.SPACE_WIDTH - self.LINE_START_DELTA,self.Y_MARGIN + self.HEADER_SPACE + (self.highest - (e1)) * self.LINE_HEIGHT * (1/self.delta) - self.LINE_HEIGHT/8,	1,slopeColor)
 
 			lineCount += 1
 
@@ -516,10 +521,10 @@ class PySlopegraph:
         </script>
     </head>
     <body>
-        <div id="surface"></div>
+        <div id="%s"></div>
     </body>
 </html>
-"""
+""" % (self.RAPHAEL_SURFACE_NAME)
 			with open(filename+".html", 'w') as f:
 				f.write(paper)
 		
@@ -584,6 +589,11 @@ class PySlopegraph:
 			self.ADD_COMMAS = True
 		else:
 			self.ADD_COMMAS = False
+			
+		if "raphael_surface_name" in config:
+			self.RAPHAEL_SURFACE_NAME = config["raphael_surface_name"]
+		else:
+			self.RAPHAEL_SURFACE_NAME = "surface"
 
 		self.SPACE_WIDTH = self.LABEL_FONT_SIZE / 2.0
 		self.LINE_HEIGHT = self.LABEL_FONT_SIZE + (self.LABEL_FONT_SIZE / 2.0)
