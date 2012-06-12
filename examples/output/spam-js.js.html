@@ -4,95 +4,112 @@
         <title></title>
         <script type="text/javascript" src="raphael-min.js"></script>
         <style type="text/css">
-            #s3 {
-                width: 534;
+            #s5 {
+                width: 584;
             }
         </style>
         <script>
-			window.onload = function() {  
-			
-				var surface = new Raphael(document.getElementById('s3'), 534, 1616);
-				var headers = new Array();
-				var lines = new Array();
-				var labels = new Array() ;
-				var values = new Array() ;
-				s3.rect(0,0,534.10546875,1616.86513065).attr({fill:'#EEEEEE',stroke:'#EEEEEE'});
-				headers[0] = s3.text(109, 44, 'April 2011').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'end'});
-				headers[1] = s3.text(396, 44, 'March 2012').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'start'});
-				s3.text(109, 1532, 'Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 1532, '1,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 1281, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 1281, '3,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 1260, 'Australia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 1260, '3,750,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 969, 'Germany; Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 969, '10,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 941, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 941, '11,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 869, 'Argentina; Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 869, '14,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 794, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 794, '18,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 728, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 728, '22,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 413, 'Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 413, '65,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 391, 'Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 391, '70,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 352, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 352, '80,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 317, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 317, '90,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 285, 'Brazil').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 285, '100,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(109, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
-				s3.text(175, 80, '200,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
-				s3.text(331, 1586, '1,250,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1586, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 1532, '1,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1532, 'Australia; Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 1121, '6,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1121, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 1075, '7,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1075, 'Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 1035, '8,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1035, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 1000, '9,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 1000, 'Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 969, '10,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 969, 'Argentina; Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 903, '12,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 903, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 869, '14,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 869, 'Germany').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 763, '20,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 763, 'Brazil; Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 557, '40,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 557, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 539, '42,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 539, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				s3.text(331, 80, '200,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
-				s3.text(396, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
-				lines[0] = s3.path('M 184.140625 867.30842083 L 322.140625 967.210079227').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[1] = s3.path('M 184.140625 1258.42717923 L 322.140625 1530.48220703').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[2] = s3.path('M 184.140625 283.551683809 L 322.140625 761.408395419').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[3] = s3.path('M 184.140625 726.437544001 L 322.140625 900.956735234').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[4] = s3.path('M 184.140625 792.690887994 L 322.140625 1118.87883942').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[5] = s3.path('M 184.140625 967.210079227 L 322.140625 867.30842083').attr({'stroke-width':1,stroke:'#A69342'});
-				lines[6] = s3.path('M 184.140625 314.834176384 L 322.140625 537.60671161').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[7] = s3.path('M 184.140625 389.45170922 L 322.140625 967.210079227').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[8] = s3.path('M 184.140625 967.210079227 L 322.140625 1073.11010464').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[9] = s3.path('M 184.140625 1530.48220703 L 322.140625 1530.48220703').attr({'stroke-width':1,stroke:'#222222'});
-				lines[10] = s3.path('M 184.140625 349.805027802 L 322.140625 555.60671161').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[11] = s3.path('M 184.140625 1278.91178845 L 322.140625 1584.61513065').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[12] = s3.path('M 184.140625 867.30842083 L 322.140625 998.492571802').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[13] = s3.path('M 184.140625 938.91162251 L 322.140625 1033.46342322').attr({'stroke-width':1,stroke:'#2A464D'});
-				lines[14] = s3.path('M 184.140625 77.75 L 322.140625 77.75').attr({'stroke-width':1,stroke:'#222222'});
-				lines[15] = s3.path('M 184.140625 411.45503821 L 322.140625 761.408395419').attr({'stroke-width':1,stroke:'#2A464D'});
-			}  
+			window.onload = function() {
+				
+				var s5_delay = 1000 ;
+				var s5 = new Raphael(document.getElementById('s5'), 584, 1616);
+				var s5_headers = new Array();
+				var s5_lines = new Array();
+				var s5_labels = new Array() ;
+				var s5_values = new Array() ;
+				s5.rect(0,0,584.10546875,1616.86513065).attr({fill:'#EEEEEE',stroke:'#EEEEEE'});
+				s5_headers[0] = s5.text(109, 44, 'April 2011').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'end'});
+				s5_headers[1] = s5.text(446, 44, 'March 2012').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'start'});
+				s5.text(109, 1532, 'Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 1532, '1,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 1281, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 1281, '3,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 1260, 'Australia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 1260, '3,750,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 969, 'Germany; Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 969, '10,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 941, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 941, '11,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 869, 'Argentina; Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 869, '14,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 794, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 794, '18,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 728, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 728, '22,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 413, 'Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 413, '65,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 391, 'Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 391, '70,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 352, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 352, '80,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 317, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 317, '90,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 285, 'Brazil').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 285, '100,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(109, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				s5.text(175, 80, '200,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				s5.text(381, 1586, '1,250,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1586, 'South Korea').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 1532, '1,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1532, 'Australia; Japan').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 1121, '6,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1121, 'Columbia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 1075, '7,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1075, 'Italy').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 1035, '8,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1035, 'United Kingdom').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 1000, '9,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 1000, 'Spain').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 969, '10,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 969, 'Argentina; Indonesia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 903, '12,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 903, 'China').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 869, '14,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 869, 'Germany').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 763, '20,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 763, 'Brazil; Venezuela').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 557, '40,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 557, 'Russia').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 539, '42,500,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 539, 'India').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5.text(381, 80, '200,000,000').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				s5.text(446, 80, 'United States').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				s5_lines[0] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[1] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[2] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[3] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[4] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[5] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#FF0000'});
+				s5_lines[6] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[7] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[8] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[9] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#000000'});
+				s5_lines[10] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[11] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[12] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[13] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[14] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#000000'});
+				s5_lines[15] = s5.path('M 184.140625 0 L 372.140625 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				s5_lines[0].animate({path:'M 184.140625 867.30842083 L 372.140625 967.210079227'},s5_delay);
+				s5_lines[1].animate({path:'M 184.140625 1258.42717923 L 372.140625 1530.48220703'},s5_delay);
+				s5_lines[2].animate({path:'M 184.140625 283.551683809 L 372.140625 761.408395419'},s5_delay);
+				s5_lines[3].animate({path:'M 184.140625 726.437544001 L 372.140625 900.956735234'},s5_delay);
+				s5_lines[4].animate({path:'M 184.140625 792.690887994 L 372.140625 1118.87883942'},s5_delay);
+				s5_lines[5].animate({path:'M 184.140625 967.210079227 L 372.140625 867.30842083'},s5_delay);
+				s5_lines[6].animate({path:'M 184.140625 314.834176384 L 372.140625 537.60671161'},s5_delay);
+				s5_lines[7].animate({path:'M 184.140625 389.45170922 L 372.140625 967.210079227'},s5_delay);
+				s5_lines[8].animate({path:'M 184.140625 967.210079227 L 372.140625 1073.11010464'},s5_delay);
+				s5_lines[9].animate({path:'M 184.140625 1530.48220703 L 372.140625 1530.48220703'},s5_delay);
+				s5_lines[10].animate({path:'M 184.140625 349.805027802 L 372.140625 555.60671161'},s5_delay);
+				s5_lines[11].animate({path:'M 184.140625 1278.91178845 L 372.140625 1584.61513065'},s5_delay);
+				s5_lines[12].animate({path:'M 184.140625 867.30842083 L 372.140625 998.492571802'},s5_delay);
+				s5_lines[13].animate({path:'M 184.140625 938.91162251 L 372.140625 1033.46342322'},s5_delay);
+				s5_lines[14].animate({path:'M 184.140625 77.75 L 372.140625 77.75'},s5_delay);
+				s5_lines[15].animate({path:'M 184.140625 411.45503821 L 372.140625 761.408395419'},s5_delay);
+			}
         </script>
     </head>
     <body>
-        <div id="s3"></div>
+        <div id="s5"></div>
     </body>
 </html>
