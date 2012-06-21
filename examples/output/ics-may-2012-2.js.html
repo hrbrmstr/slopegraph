@@ -1,0 +1,90 @@
+<html>
+   <head>
+        <title></title>
+        <script type="text/javascript" src="raphael-min.js"></script>
+        <style type="text/css">
+            #icsMay2012Part2 {
+                width: 2630;
+            }
+        </style>
+        <script>
+			window.onload = function() {
+				
+				var icsMay2012Part2_delay = 1000 ;
+				var icsMay2012Part2 = new Raphael(document.getElementById('icsMay2012Part2'), 2630, 17280);
+				var icsMay2012Part2_headers = new Array();
+				var icsMay2012Part2_lines = new Array();
+				var icsMay2012Part2_labels = new Array() ;
+				var icsMay2012Part2_values = new Array() ;
+				icsMay2012Part2.rect(0,0,2630.91992188,17280.0869319).attr({fill:'#EEEEEE',stroke:'#EEEEEE'});
+				icsMay2012Part2_headers[0] = icsMay2012Part2.text(255, 44, 'Current Month').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'end'});
+				icsMay2012Part2_headers[1] = icsMay2012Part2.text(637, 44, 'Previous Month').attr({'font':'14.0px Palatino','font-family':'Palatino','font-size':'14','font-weight':'bold','fill':'#403B33','text-anchor':'start'});
+				icsMay2012Part2.text(255, 17250, 'Overall: Information sharing').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 17250, '720.3').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1802, 'Effect desired: Data modification').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1802, '1007.4').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1606, 'Weapons: Botnets').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1606, '1011.7').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1248, 'Target: Internet exposed devices/appliances').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1248, '1019.6').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1207, 'Weapons: Vulnerability exploitation').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1207, '1020.5').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1090, 'Attackers: Criminals').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1090, '1023.1').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 1072, 'Target: End points').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 1072, '1023.5').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 969, 'Effect desired: Business disruption').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 969, '1025.8').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 892, 'Effect desired: Data theft').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 892, '1027.5').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 812, 'Target: Public infrastructure/cloud').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 812, '1029.3').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 691, 'Target: Mobile devices').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 691, '1032.0').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 398, 'Defenses: Vulnerability to known threats').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 398, '1038.6').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 353, 'Weapons: Customized to target').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 353, '1039.6').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(255, 80, 'Weapons: Phishing/social engineering').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#73573F','text-anchor':'end'});
+				icsMay2012Part2.text(293, 80, '1045.8').attr({'font':'12px Palatino','font-family':'Palatino','font-size':'12','fill':'#A67F5D','text-anchor':'end'});
+				icsMay2012Part2.text(599, 16514, '731.9').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				icsMay2012Part2.text(637, 16514, 'Overall: Information sharing').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				icsMay2012Part2.text(599, 2142, '1000.0').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				icsMay2012Part2.text(637, 2142, 'Weapons: Phishing/social engineering; Weapons: Customized to target; Target: Mobile devices; Target: Public infrastructure/cloud; Effect desired: Data theft; Effect desired: Business disruption; Target: End points; Attackers: Criminals; Weapons: Vulnerability exploitation; Target: Internet exposed devices/appliances; Weapons: Botnets; Effect desired: Data modification').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				icsMay2012Part2.text(599, 812, '1029.3').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#A67F5D','text-anchor':'start'});
+				icsMay2012Part2.text(637, 812, 'Defenses: Vulnerability to known threats').attr({'font':'12px Palatino','font-family':'Palatino','font-size':12.0,'fill':'#73573F','text-anchor':'start'});
+				icsMay2012Part2_lines[0] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[1] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[2] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[3] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[4] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[5] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[6] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[7] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[8] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[9] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[10] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[11] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[12] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#2A464D'});
+				icsMay2012Part2_lines[13] = icsMay2012Part2.path('M 302.28125 0 L 590.28125 0').attr({'stroke-width':0.5,stroke:'#FF0000'});
+				icsMay2012Part2_lines[0].animate({path:'M 302.28125 77.75 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[1].animate({path:'M 302.28125 351.559856673 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[2].animate({path:'M 302.28125 395.875613547 L 590.28125 810.067723252'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[3].animate({path:'M 302.28125 689.43412356 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[4].animate({path:'M 302.28125 810.067723252 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[5].animate({path:'M 302.28125 890.666050854 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[6].animate({path:'M 302.28125 966.916444747 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[7].animate({path:'M 302.28125 1070.28012319 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[8].animate({path:'M 302.28125 1088.28012319 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[9].animate({path:'M 302.28125 1205.45194065 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[10].animate({path:'M 302.28125 1246.08098056 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[11].animate({path:'M 302.28125 1604.26045134 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[12].animate({path:'M 302.28125 1800.39620176 L 590.28125 2139.90047518'},icsMay2012Part2_delay);
+				icsMay2012Part2_lines[13].animate({path:'M 302.28125 17247.8369319 L 590.28125 16512.1614677'},icsMay2012Part2_delay);
+			}
+        </script>
+    </head>
+    <body>
+        <div id="icsMay2012Part2"></div>
+    </body>
+</html>
